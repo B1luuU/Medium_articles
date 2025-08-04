@@ -1,0 +1,167 @@
+import Image from 'next/image'
+import Alert from '@/components/Alert'
+
+
+# CRTA na Unha: A Prova Que Não Tem Ctrl+Z
+
+A certificação CRTA da CyberWarFare Labs é uma excelente porta de entrada para quem deseja comprovar sua capacidade prática em Red Team, especialmente em ataques a redes corporativas simuladas.
+
+<Image src="/images/crta1.png" alt="crta1.png" width={800} height={400} />
+
+Diferente de provas teóricas, a CRTA é **100% hands-on** e te coloca em um ambiente realista onde é preciso invadir, pivotar e comprometer ativos, tudo isso dentro de um ambiente simulado que te desafia a:
+
+* Obter acesso inicial (foothold)
+
+* Escalar privilégios
+
+* Fazer movimentação lateral
+
+* Explorar o Active Directory
+
+* Coletar informações sensíveis e capturar as famosas **flags**
+
+A prova tem duração de **6 horas**, e você acessa o ambiente remotamente via **VPN**, com total estabilidade. É possível **resetar os labs até duas vezes**, caso precise começar do zero durante o exame.
+
+⚠️ **Importante sobre o agendamento:**
+ A Zero-Point usa o fuso horário **GMT+0**, então, para quem está no Brasil (GMT-3 ou -4 dependendo do horário de verão), é necessário atenção redobrada.
+ **Agende pensando no seu horário local** — por exemplo, se quiser iniciar às 10h da manhã (horário de Brasília), agende para **13h GMT**. Caso marque errado, você pode **cancelar e reagendar sem problema** antes do início.
+
+Se você quer passar no exame com tranquilidade e ética, aqui vão os **temas essenciais para estudar**, **sem spoilers**.
+
+<Image src="/images/crta2.png" alt="crta2.png" width={800} height={400} />
+
+## 🧠 1. Entender como obter um Foothold
+<Alert type="info">*🔍 Dica: O acesso inicial geralmente se dá por algum serviço web vulnerável, endpoint mal configurado ou credenciais expostas.*</Alert>
+
+## O que estudar:
+
+* Enumeração de serviços (nmap, httpx, ffuf, feroxbuster)
+
+* Vulnerabilidades como LFI (Local File Inclusion)
+
+* Identificação de arquivos públicos ou sensíveis servidos pela aplicação
+
+* Análise de código-fonte HTML e JavaScript
+
+## Ferramentas úteis:
+
+* nmap, httpx, ffuf, curl, Burp Suite
+
+## 🔐 2. Escalada de Privilégio Local (Linux)
+
+Após o acesso ao primeiro host, será necessário ganhar permissões elevadas para prosseguir.
+
+## O que estudar:
+
+* sudo -l para verificar comandos disponíveis
+
+* Ferramentas como o [GTFOBins](https://gtfobins.github.io/) são essenciais para identificar quais binários comuns do sistema podem ser explorados para obter uma shell, mostrando de forma criativa e prática como abusar de comandos legítimos para escalar privilégios.
+
+**GTFOBins** é o manual do hacker raiz: te mostra como transformar comandos inofensivos em portas de entrada para uma shell privilegiada.
+
+* Como explorar comandos como vi, less, nano, awk, find, entre outros, todos com técnicas listadas no GTFOBins.
+
+**Enumeração pós-acesso** com ferramentas como:
+
+* [**LinPEAS** ](https://github.com/peass-ng/PEASS-ng/tree/master/linPEAS)— ideal para varrer rapidamente possíveis vetores de privesc
+
+* [**pspy](https://github.com/DominicBreuker/pspy)** — para detectar processos e scripts executados automaticamente pelo sistema
+
+### 🛠️ Ferramentas úteis:
+
+sudo -l, find / -perm -4000 -type f, linpeas.sh, pspy64, GTFOBins
+
+<Image src="/images/crta3.png" alt="crta3.png" width={800} height={400} />
+
+## 🌐 3. Pivoting e Movimentação Lateral
+<Alert type="info">*🧭 O exame exige que você acesse outra máquina em uma rede interna. Aqui entra o uso de tunelamento e redirecionamento de tráfego.*</Alert>
+
+## O que estudar:
+
+* proxychains, socat, chisel (modo reverso)
+
+* Conceitos de tunneling: SOCKS proxy, port forwarding, redirecionamento reverso
+
+* Como acessar um serviço que só responde localmente por meio de proxy
+
+## 🧰 4. Enumeração e Ataque ao Active Directory
+<Alert type="info">*🏢 Após acessar a rede interna, você encontrará credenciais para o domínio e deverá interagir com o Domain Controller.*</Alert>
+
+## O que estudar:
+
+* Conceitos básicos de Active Directory (usuários, grupos, hashes NTLM)
+
+* Uso de CrackMapExec e Impacket (secretsdump, smbclient)
+
+* Impacket (ex: secretsdump.py, smbclient.py, psexec.py, wmiexec.py)
+
+* BloodHound (opcional, para análise gráfica)
+
+* ldapsearch, rpcclient e similares
+
+* Como extrair NTDS.dit, identificar o administrador de domínio e coletar informações sensíveis
+
+## 📦 5. Pós-Exploitation
+
+## O que estudar:
+
+* Coleta de arquivos sensíveis no Windows (geralmente em Desktop, AppData, etc.)
+
+* Como montar ou usar um shell via SMB para download de arquivos
+
+* Técnicas de enumeração e boas práticas de exfiltração
+
+## 📌 Áreas-chave para seu estudo
+
+* **Enumeração Web**: LFI, caminhos interessantes, arquivos públicos
+
+* **Linux Privesc**: sudo -l, GTFOBins, scripts de enumeração
+
+* **Pivoting**: socat, chisel, proxychains, redes internas
+
+* **Active Directory**: crackmapexec, impacket, LDAP básico
+
+<Image src="/images/crta4.png" alt="crta4.png" width={800} height={400} />
+
+* **Pós-Exploitation**: SMB, exfiltração de arquivos, NTDS
+
+<Image src="/images/crta5.png" alt="crta5.png" width={800} height={400} />
+
+## 🧭 Dicas Finais
+
+* A prova é direta: **não exige fuzzing pesado ou exploração cega**. As informações certas estão lá.
+
+* Você **não precisa quebrar senhas nem fazer bruteforce**. Use inteligência e enumeração.
+
+* **Evite pedir ou entregar flags a outros candidatos**. O exame é uma simulação real e ética importa.
+
+* Tenha comandos básicos prontos, entenda como funcionam, mas **não memorize sem compreender.**
+
+## 📚 Recursos recomendados para estudo
+
+* **HackTheBox**: máquinas como *Optimum, Bastard, Forest, Active*
+[**Join The Best Hacking Community Worldwide | Hack The Box**
+*Optimum is a beginner-level machine which mainly focuses on enumeration of services with known exploits. Both exploits…*www.hackthebox.com](https://www.hackthebox.com/machines/optimum)
+[**Join The Best Hacking Community Worldwide | Hack The Box**
+*Bastard is not overly challenging, however it requires some knowledge of PHP in order to modify and use the proof of…*www.hackthebox.com](https://www.hackthebox.com/machines/bastard)
+[**Join The Best Hacking Community Worldwide | Hack The Box**
+*Forest is an easy Windows machine that showcases a Domain Controller (DC) for a domain in which Exchange Server has…*www.hackthebox.com](https://www.hackthebox.com/machines/forest)
+
+[https://www.hackthebox.com/machines/active](https://www.hackthebox.com/machines/active)
+
+* **TryHackMe**: Labs de Red Team / AD / Privesc
+
+* **GTFOBins**: Para escapar via comandos sudo
+
+[https://gtfobins.github.io/](https://gtfobins.github.io/)
+
+* **Chisel + Socat labs**: Treine localmente com VMs
+
+você entender os fundamentos e pensar como atacante, vai passar com tranquilidade. E lembre-se: o objetivo do CRTA não é te derrubar com pegadinhas, e sim **validar sua habilidade de pensar e agir como um Red Teamer real**.
+
+Se você dominar os fundamentos e pensar como um atacante, vai se sair bem. A CRTA não está lá pra te humilhar está lá pra testar sua mente estratégica e sim **validar sua habilidade hacker de pensar e agir como um Red Teamer real**.
+ Não é sobre ser um hacker de filme. É sobre ser alguém que resolve problemas reais em ambientes reais.
+
+**Estude com ética, pratique com propósito e que o shell esteja com você!**
+
+<Image src="/images/crta6.png" alt="crta6.png" width={800} height={400} />
