@@ -1,0 +1,204 @@
+---
+title: "Hackeando Apps"
+date: "2025-08-04"
+excerpt: "Artigo convertido automaticamente do Medium sobre Hackeando Apps."
+coverImage: "/images/hackeando_apps1.png"
+tags: ["Medium", "Importado"]
+---
+
+import Image from 'next/image'
+import Alert from '@/components/Alert'
+
+
+# 🔥 Hackeando Apps Mobile no Estilo GTA: Invadindo Android e iOS sem Freio 🎮🚀
+
+🎬 Introdução
+
+Imagine que você está jogando GTA, mas ao invés de carros e perseguições, você está invadindo aplicativos mobile. Sim, meu caro hacker, o pentest mobile pode ser tão emocionante quanto um assalto de filme de ação! Mas ao invés de armas e disfarces, o que temos são **Activities, Content Providers, Services e Broadcast Receivers** vulneráveis no Android, e seus primos mais discretos no iOS.
+
+Se você já passou raiva com aplicativos mal projetados, este artigo é pra você. Aqui, vamos explorar as brechas que tornam um simples teste de segurança em um verdadeiro show de horrores (ou diversão, depende do ponto de vista 😏).
+
+<Image src="/images/hackeando_apps1.png" alt="hackeando_apps1.png" width={800} height={400} />
+
+## 1. Exploitable Exposed Activities (Android) — A porta dos fundos que nem precisava de chave 🔓
+
+## O que são?
+
+Pense nas Activities como aquelas portas que só deviam ser abertas por funcionários, mas que alguém esqueceu destrancada. Agora qualquer um pode entrar e fuçar onde não deveria.
+
+## Riscos e Exploração:
+
+* **Bypass de autenticação:** Você pula a parte chata de login e cai direto na área VIP do app.
+
+* **Injection de Intents:** Manda mensagens personalizadas para o app e vê ele agir como um funcionário confuso tentando entender o que você quer.
+
+* **Roubo de dados:** Se a Activity exibe informações sensíveis, bingo! Você acabou de ganhar acesso VIP sem precisar de convite.
+
+## Como testar?
+
+* Descobrir Activities abertas ao público:
+
+    adb shell dumpsys package com.alvo.app | grep Activity
+
+* Tentar abrir uma diretamente (sem precisar ser convidado 🏴‍☠️):
+
+    adb shell am start -n com.alvo.app/.ExposedActivity
+
+## Explorando uma Activity exposta com Frida
+
+Se um app possui uma Activity vulnerável, podemos injetar código com Frida:
+
+    frida -U -n com.alvo.app -e 'Java.use("com.alvo.app.ExposedActivity").onCreate.overload("android.os.Bundle").implementation = function(bundle) { console.log("Interceptando onCreate!"); this.onCreate(bundle); }'
+
+Isso permite interceptar e modificar o comportamento da Activity no runtime.
+
+## 2. Exploitable Content Providers (Android) — O vazamento de dados nível “ops, esqueci isso aqui” 📂
+
+## O que são?
+
+Content Providers são como aquele colega de trabalho que compartilha tudo sem filtro. Se mal configurados, eles deixam o banco de dados do app exposto para quem quiser acessar.
+
+## Riscos e Exploração:
+
+* **Acesso não autorizado a dados sensíveis.**
+
+* **SQL Injection direto na veia.**
+
+* **LFI (Local File Inclusion) pra bisbilhotar arquivos internos.**
+
+## Como testar?
+
+* Listar Content Providers disponíveis:
+
+    adb shell content query --uricontent://com.alvo.app/exposed_provider
+
+* Testar injeção SQL:
+
+    adb shell content query --uri "content://com.alvo.app/exposed_provider" --where "1=1; DROP TABLE users;"
+
+* Ferramentas úteis: **Drozer, Frida, Objection.**
+
+## Explorando um Content Provider com Objection
+
+Para acessar um Content Provider exposto:
+
+    objection -g com.alvo.app explore
+    > android.contentresolver.query content://com.alvo.app.exposed_provider
+
+Se o Content Provider estiver aberto, podemos extrair dados sensíveis do banco interno.
+
+## 3. Exploitable Exposed Services (Android) — O app que obedece qualquer comando sem perguntar quem é você 🤖
+
+## O que são?
+
+Services são processos de background que deviam rodar discretamente, mas se estiverem expostos, aceitam comandos de qualquer um, tipo um estagiário desesperado querendo ajudar.
+
+## Riscos e Exploração:
+
+* **Execução arbitrária de código:** Se o Service não pede credencial, qualquer um pode mandar ordens.
+
+* **DoS ao forçar reinicializações do Service:** Derrubando o sistema só de zoeira.
+
+* **Interceptação de dados:** Pegando informações sensíveis enquanto o Service trabalha.
+
+## Como testar?
+
+* Listar Services ativos:
+
+    adb shell dumpsys activity services | grep com.alvo.app
+
+* Tentar iniciar um Service manualmente:
+
+    adb shell am startservice -n com.alvo.app/.ExposedService
+
+* Ferramentas úteis: **Drozer, Frida, Objection.**
+
+## Manipulando um Service com Frida
+
+Se um Service aceita comandos sem validação, podemos explorá-lo assim:
+
+    frida -U -n com.alvo.app -e 'Java.use("com.alvo.app.ExposedService").onStartCommand.implementation = function(intent, flags, startId) { console.log("Interceptando Service!"); return this.onStartCommand(intent, flags, startId); }'
+
+Isso nos dá total controle sobre os comandos que o Service recebe e executa.
+
+## 4. Exploitable Broadcast Receivers (Android) — O “fala que eu te escuto”, mas sem filtro 🎙️
+
+## O que são?
+
+Broadcast Receivers são aqueles caras que escutam tudo e acreditam em qualquer coisa que você diz. Se forem mal configurados, aceitam mensagens falsas e fazem besteira.
+
+## Riscos e Exploração:
+
+* **Execução de ações não autorizadas.**
+
+* **DoS ao enviar múltiplas mensagens falsas.**
+
+* **Data Injection pra bagunçar a lógica da aplicação.**
+
+## Como testar?
+
+* Enviar um broadcast falso:
+
+    adb shell am broadcast -a com.alvo.app.EXPOSED_BROADCAST
+
+* Ferramentas úteis: **Drozer, Frida.**
+
+## Disparando Broadcasts com Frida
+
+Se um Broadcast Receiver aceita intents sem validação:
+
+    adb shell am broadcast -a com.alvo.app.EXPOSED_BROADCAST --es "data" "payload malicioso"
+
+Ou, interceptando no Frida:
+
+    frida -U -n com.alvo.app -e 'Java.use("com.alvo.app.VulnerableReceiver").onReceive.implementation = function(context, intent) { console.log("Interceptado:", intent); }'
+
+Isso permite capturar e modificar dados transmitidos pelo app.
+
+## E no iOS? Tem equivalente? 🍏
+
+O iOS tem segurança mais rígida, mas nada é 100% à prova de falhas. Aqui estão os pontos de ataque:
+
+**Deep Linking — O atalho sem segurança 🔗**
+
+Se mal protegido, permite abrir telas restritas do app sem passar por autenticação.
+
+Teste com Frida:
+
+    frida -U -n AppAlvo -e 'objc_msgSend(objc_getClass("UIApplication"), sel_registerName("openURL:"), NSURL.URLWithString_("appalvo://admin"))'
+
+**URL Schemes & File Sharing — “Toma aqui meus dados!”**
+
+Apps podem compartilhar arquivos via URL Schemes. Se não for controlado, pode ser um vazamento de dados waiting to happen.
+
+Verifique com:
+
+    strings AppAlvo.app/AppAlvo | grep "URLScheme"
+
+**XPC Services — “Eu faço tudo que você mandar, chefe!”**
+
+Comunicação entre processos pode ser explorada para executar código malicioso.
+
+Teste com Frida:
+
+    frida -U -n AppAlvo -e 'ObjC.classes.NSXPCConnection.alloc().initWithServiceName_("com.alvo.service")'
+
+## Ferramentas úteis para iOS
+
+## Como testar vulnerabilidades no iOS?
+
+* **Burp Suite **para interceptar tráfego.
+
+* **Frida** para manipular Deep Links e XPC Services.
+
+* **objection** para análise dinâmica.
+
+## Conclusão 🎭
+
+O mobile security tem mais armadilhas do que um filme de terror mal feito. Se você está no **Red Team Mobile**, sua missão é encontrar esses buracos antes que os atacantes façam a festa.
+
+Testar, explorar e relatar essas falhas pode salvar um app de ser o próximo meme de segurança no Twitter. Então, bora quebrar o código antes que alguém faça isso por nós! 🚀
+
+🤔 Curtiu o artigo? Manda praquele amigo que acha que JSON Web Token é nome de super-herói! 😂
+
+<Image src="/images/hackeando_apps2.png" alt="hackeando_apps2.png" width={800} height={400} />
